@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이미지 갤러리</title>
+    <style>
+        @font-face {
+            font-family: 'TTTtangsbudaejjigaeB';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2212@1.0/TTTtangsbudaejjigaeB.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+        * {
+          font-family: 'TTTtangsbudaejjigaeB', sans-serif;
+        }
+        body {
+            margin: 100px auto;
+            padding: 0;
+            background: radial-gradient(105.16% 105.16% at 100% 0%, #EF620D 0%, #263174 60.6%, rgba(37, 47, 126, 0.87) 76.19%, #000000 100%);
+    
+        }
+    
+        .container {
+            position: relative;
+            width: 90%;
+            margin: auto;
+            padding: 20px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+        }
+            
+        h1 {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 400;
+            font-size: 20px;
+            color: #FFFFFF;
+        }
+    
+        h2 {
+            text-align: center;
+            font-weight: 400;
+            font-size: 15px;
+            color: #FFFFFF;
+        }
+        
+        .button_container {
+            margin-top: 20px;
+            text-align: center;
+        }
+    
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #555555;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+            
+        .button:hover {
+            background-color: #777777;
+        }
+            
+        .grid_container {
+            position: relative;
+            width: 70%;
+            height: 300px;
+            margin: auto;
+            padding: 20px;
+            overflow-y: scroll;
+            color: #fff;
+        }
+    
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            padding: 20px;
+            gap: 25px;
+        }
+    
+        .grid img {
+            position: relative;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        .grid img.selected {
+            border-color: #2196F3;
+            outline: 2px solid #2196F3;
+        }
+    
+        .checkmark {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            display: none;
+            width: 20px;
+            height: 20px;
+            background-color: #2196F3;
+            border-radius: 50%;
+            clip-path: polygon(100% 0%, 0% 100%, 0% 0%);
+        }
+    
+        .grid img.selected + .checkmark {
+            display: block;
+        }
+            
+        .grid img:hover {
+            background-color: #ddd;
+        }
+
+        .button_nextstep {
+            position: absolute;
+            float: right;
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .loading{
+            visibility: hidden;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            left: 0vmin;
+            top: 0vmin;
+            z-index: 10;
+        }
+    
+        #loading-text, #loading-message {
+            color: #ffdf76;
+            font-size: 1.5rem;
+            font-weight: var(--font-weight-black);
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>자신이 닮고 싶은 인물을 선택해주세요.</h1>
+        <h2>성별이 다르더라도 선택이 가능합니다 :)</h2>
+        <div class="button_container">
+            <div class="button button_manselect" onclick="showGrid('man')">남자</div>
+            <div class="button button_womanselect" onclick="showGrid('woman')">여자</div>
+        </div>
+        <div class="grid_container" id="man">
+            <div class="grid">
+                <!-- 여기에 이미지 추가 -->
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/cew.jpg" alt="차은우">
+                    <div class="alt_text">차은우</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/faker.jpg" alt="대상혁">
+                    <div class="alt_text">대상혁</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/jhi.jpg" alt="정해인">
+                    <div class="alt_text">정해인</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/halland.jpg" alt="홀란드">
+                    <div class="alt_text">홀란드</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/hjm.jpg" alt="황정민">
+                    <div class="alt_text">황정민</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/shm.jpg" alt="손흥민">
+                    <div class="alt_text">손흥민</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/ccm.jpg" alt="침착맨">
+                    <div class="alt_text">침착맨</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/hjp.jpg" alt="홍준표">
+                    <div class="alt_text">홍준표</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/lcs.jpg" alt="이창섭">
+                    <div class="alt_text">이창섭</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/kdw.jpg" alt="강동원">
+                    <div class="alt_text">강동원</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/ronaldo.jpg" alt="호날두">
+                    <div class="alt_text">호날두</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/njh.jpg" alt="남주혁">
+                    <div class="alt_text">남주혁</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/pbg.jpg" alt="박보검">
+                    <div class="alt_text">박보검</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/rjy.jpg" alt="류준열">
+                    <div class="alt_text">류준열</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/gong.jpg" alt="공유">
+                    <div class="alt_text">공유</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/sg.jpg" alt="송강">
+                    <div class="alt_text">송강</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/sgj.jpg" alt="서강준">
+                    <div class="alt_text">서강준</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/V.jpg" alt="뷔">
+                    <div class="alt_text">뷔</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/ybj.jpg" alt="유병재">
+                    <div class="alt_text">유병재</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/yjg.jpg" alt="여진구">
+                    <div class="alt_text">여진구</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="image_info"></div>
+
+        <div class="grid_container" id="woman" style="display: none;">
+            <div class="grid">
+                <!-- 여기에 이미지 추가 -->
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/karina.jpg" alt="카리나">
+                    <div class="alt_text">카리나</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/chuu.jpg" alt="츄">
+                    <div class="alt_text">츄</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/haerin.jpg" alt="해린">
+                    <div class="alt_text">해린</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/kcw.jpg" alt="김채원">
+                    <div class="alt_text">김채원</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/minji.jpg" alt="민지">
+                    <div class="alt_text">민지</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/winter.jpg" alt="윈터">
+                    <div class="alt_text">윈터</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/jhy.jpg" alt="주현영">
+                    <div class="alt_text">주현영</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/ssg.jpg" alt="신세경">
+                    <div class="alt_text">신세경</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/IU.jpg" alt="아이유">
+                    <div class="alt_text">아이유</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/gms.jpg" alt="고민시">
+                    <div class="alt_text">고민시</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/gyj.jpg" alt="고윤정">
+                    <div class="alt_text">고윤정</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/jwy.jpg" alt="장원영">
+                    <div class="alt_text">장원영</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/jenny.jpg" alt="제니">
+                    <div class="alt_text">제니</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/arin.jpg" alt="아린">
+                    <div class="alt_text">아린</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/pby.jpg" alt="박보영">
+                    <div class="alt_text">박보영</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/suzy.jpg" alt="수지">
+                    <div class="alt_text">수지</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/hsh.jpg" alt="한소희">
+                    <div class="alt_text">한소희</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/nys.jpg" alt="노윤서">
+                    <div class="alt_text">노윤서</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/ning.jpg" alt="닝닝">
+                    <div class="alt_text">닝닝</div>
+                </div>
+                <div class="image_container" onclick="selectImage(this)">
+                    <img src="/static/jjs.jpg" alt="전종서">
+                    <div class="alt_text">전종서</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="image_info"></div>
+
+        <section class = "loading", id="loading">
+            <div class="spinner-grow text-info" role="status"></div>
+            <div id="loading-text">Loading...</div>
+            <div id="loading-message">약 3분의 시간이 소요됩니다</div>
+        </section>
+
+        <div class="button button_nextstep" onclick="submitForm()">성형 상담 받기</div>
+    </div>
+
+    <script>
+        function showGrid(gridId) {
+            document.querySelectorAll('.grid_container').forEach(grid => {
+                grid.style.display = 'none';
+            });
+
+            const selectedGrid = document.getElementById(gridId);
+            if (selectedGrid) {
+                selectedGrid.style.display = 'block';
+            }
+
+            selectedImage = null;
+            updateImageSelection();
+        }
+
+        function selectImage(imageContainer) {
+            selectedImage = imageContainer.querySelector('img');
+            updateImageSelection();
+
+            // 선택된 이미지의 alt 속성 값을 가져옵니다.
+            const altText = selectedImage.getAttribute('alt');
+
+            // alt 속성 값을 각 이미지 컨테이너 하단에 있는 div에 표시합니다.
+            const imageInfoContainer = document.querySelector('.image_info');
+            imageInfoContainer.textContent = "선택된 이미지: " + altText;
+        }
+
+        function updateImageSelection() {
+            document.querySelectorAll('.grid_container img').forEach(image => {
+                image.classList.remove('selected');
+            });
+
+            if (selectedImage) {
+                selectedImage.classList.add('selected');
+            }
+        }
+        function resizeImages() {
+            // 각 이미지 요소를 선택합니다.
+            const images = document.querySelectorAll('.grid_container img');
+
+            // 이미지의 너비와 높이를 설정합니다.
+            const width = 130; // 원하는 너비
+            const height = 130; // 원하는 높이
+
+            // 모든 이미지에 대해 크기를 조정합니다.
+            images.forEach(image => {
+                image.style.width = width + 'px';
+                image.style.height = height + 'px';
+            });
+        }
+
+        // 페이지 로드 시 이미지 크기를 조정합니다.
+        window.addEventListener('load', resizeImages);
+
+
+        function submitForm() {
+
+            const selectedImageElement = selectedImage;
+
+            const formData = new FormData();
+
+            // const image2 = selectedImage.src;
+
+            if (!selectedImage) {
+                alert('이미지를 선택해주세요!');
+                return;
+            }
+
+            const imageurl = selectedImageElement.src;
+
+            // console.log("image2:", imageurl);
+            // alert("image2: " + imageurl);
+
+            formData.append('image2_url', imageurl);
+
+            const requestOptions = {
+                method: 'POST',
+                mode: 'cors',
+                body: formData,
+            };
+
+            // 로딩 표시 활성화
+            const loading = document.getElementById("loading");
+            loading.style.visibility = 'visible';
+
+            // 서버에 POST 요청 보내기
+            fetch('http://127.0.0.1:5000/submit', requestOptions)
+                .then(response => {
+                    if (response.ok) {
+                        // 성공 시 결과 페이지로 이동
+                        window.location.href = '/result';
+                    } else {
+                        // 오류 처리
+                        console.error('Error:', error);
+                        alert('처리 중 오류가 발생했습니다.');
+                        window.location.href = '/';  // 오류 발생 시 메인 페이지로 이동
+                    }
+                })
+                .catch(error => {
+                    // 오류 처리
+                    console.error('Error:', error);
+                    alert('처리 중 오류가 발생했습니다!');
+                    window.location.href = '/';
+                });
+        }
+    </script>
+</body>
+</html>

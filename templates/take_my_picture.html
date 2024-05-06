@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>얼굴 촬영 단계</title>
+    <style>
+        @font-face {
+            font-family: 'TTTtangsbudaejjigaeB';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2212@1.0/TTTtangsbudaejjigaeB.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+        * {
+          font-family: 'TTTtangsbudaejjigaeB', sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* 화면 전체 높이로 설정 */
+            margin: 0; /* body의 기본 마진 제거 */
+            background: radial-gradient(105.16% 105.16% at 100% 0%, #EF620D 0%, #263174 60.6%, rgba(37, 47, 126, 0.87) 76.19%, #000000 100%);
+        }
+
+        .container {
+            position: relative; /* .display_camera의 위치 지정을 위해 상대적 위치 지정 */
+
+            width: 100%;
+            margin: auto;
+            padding: 20px;
+
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-top: 30px;
+            text-align: center;
+            font-weight: 400;
+            font-size: 20px;
+            color: #fff;
+        }
+
+        h2 {
+            text-align: center;
+            font-weight: 400;
+            font-size: 15px;
+            color: #fff;
+        }
+
+        .display_camera {
+            margin: 0 auto;
+            width: 100vh;
+            height: 50vh;
+            overflow: hidden; /* 비디오가 넘치는 경우를 대비하여 추가 */
+        }
+
+        .display_camera img {
+            object-fit: contain;
+            width: 100%; /* 부모 요소의 너비에 맞게 설정 */
+            height: 100%; /* 부모 요소의 높이에 맞게 설정 */
+        }
+
+        .display_camera video {
+            margin: 0 auto;
+            display: block; /* 블록 요소로 변경 */
+            width: 100%; /* 부모 요소의 너비에 맞게 설정 */
+            height: 100%; /* 부모 요소의 높이에 맞게 설정 */
+        }
+
+        .button_container {
+            margin-top: 40px;
+            margin-bottom: 100px;
+            text-align: center;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #555555;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .button:hover {
+            background-color: #777777;
+        }
+
+        .button_takeapicture {
+            margin: 0 auto; /* 가운데 정렬 */
+        }
+
+        .button_nextstep {
+            margin-left: auto; /* 오른쪽 정렬을 위해 */
+            position: absolute;
+            bottom: 50px;
+            right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>스페이스 바를 눌러서 합성에 사용할 본인 얼굴을 촬영해주세요.</h1>
+        <h2>찍은 사진은 서비스 진행 후 모두 완전히 삭제됩니다 :)</h2>
+        <div class="display_camera" id="video-container"></div>
+        <div class="button_container">
+            <div class="button button_takeapicture" onclick="startCamera()">사진 촬영</div>
+            <div class="button button_nextstep" onclick="submitForm()">다음 단계</div>
+        </div>
+    </div>
+
+    <script>
+        let lastPhotoUrl; // 마지막으로 찍은 사진의 URL을 저장할 변수
+
+        async function startCamera() {
+            const videoContainer = document.getElementById('video-container');
+
+            try {
+                // 기존의 비디오 엘리먼트와 이미지 엘리먼트를 모두 제거
+                videoContainer.innerHTML = '';
+
+                // 사용자의 카메라 비디오 스트림 가져오기
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.autoplay = true;
+                video.controls = false;
+
+                // 비디오 컨테이너에 비디오 엘리먼트 추가
+                videoContainer.appendChild(video);
+
+                // 이미지 촬영 이벤트 핸들러 등록
+                const handleSpacePress = async function(event) {
+                    if (event.code === 'Space') {
+                        event.preventDefault();
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        
+                        
+                        // Canvas에서 중앙 부분 잘라내기
+                        const croppedImageData = context.getImageData(0, 0, video.videoWidth, video.videoHeight);
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        context.putImageData(croppedImageData, 0, 0);
+                        
+                        const imageUrl = canvas.toDataURL('image/png');
+
+                        // 촬영된 이미지를 화면에 표시
+                        const imageElement = new Image();
+                        imageElement.src = imageUrl;
+                        videoContainer.innerHTML = ''; // 비디오 엘리먼트 제거
+                        videoContainer.appendChild(imageElement);
+
+                        // 마지막으로 찍은 사진의 URL 저장
+                        lastPhotoUrl = imageUrl;
+                        document.cookie = `lastPhotoUrl=${lastPhotoUrl}`;
+
+                        // 알림 출력
+                        alert('사진이 촬영되었습니다!');
+
+                        // 이벤트 핸들러 제거
+                        document.body.removeEventListener('keypress', handleSpacePress);
+                    }
+                };
+
+                // 스페이스 바 이벤트 리스너 등록
+                document.body.addEventListener('keypress', handleSpacePress);
+            } catch (error) {
+                console.error('카메라를 불러오는 동안 오류가 발생했습니다:', error);
+            }
+        }
+
+        // function navigateToNextStep() {
+        //     if (lastPhotoUrl) {
+                
+        //         window.location.href = 'select_wanttobe_face.html';
+        //     } else {
+        //         alert('사진을 먼저 촬영해주세요!');
+        //     }
+        // }
+        
+
+        function submitForm() {
+            const videoContainer = document.getElementById('video-container');
+            if (lastPhotoUrl) {
+
+                // 마지막으로 찍은 이미지를 Blob으로 변환
+                const imageUrl = lastPhotoUrl;
+
+                // 이미지를 가져오고 Blob으로 변환
+                fetch(imageUrl)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        // 이미지를 FormData에 추가
+                        const formData = new FormData();
+                        formData.append('image', blob);
+
+                        // 서버로 이미지 전송
+                        const requestOptions = {
+                            method: 'POST',
+                            body: formData,
+                        };
+
+                        fetch('http://127.0.0.1:5000/upload', requestOptions)
+                            .then(response => {
+                                if (response.ok) {
+                                    // 성공 시 결과 페이지로 이동
+                                    window.location.href = '/select_wanttobe_face.html';
+                                } else {
+                                    // 오류 처리
+                                    console.error('Error:', response.statusText);
+                                    alert('처리 중 오류가 발생했습니다.');
+                                    window.location.href = '/';  // 오류 발생 시 메인 페이지로 이동
+                                }
+                            })
+                            .catch(error => {
+                                // 오류 처리
+                                console.error('Error:', error);
+                                alert('처리 중 오류가 발생했습니다!');
+                                window.location.href = '/';
+                            });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching image:', error);
+                        alert('이미지를 가져오는 중 오류가 발생했습니다.');
+                    });
+            }
+        }
+
+    </script>
+</body>
+</html>
